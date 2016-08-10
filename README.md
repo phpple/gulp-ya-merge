@@ -2,6 +2,21 @@
 
 用来合并html页面里边的js和css，并对js和css增加文件版本号。
 
+## 用法
+```js
+var destDir = "dist";
+var merge = require('gulp-ya-merge');
+
+gulp.task('merge', function () {
+  gulp.src('mall/**/*.phtml')
+    .pipe(merge({
+      rootPath: process.cwd() + '/share/static/',
+    }))
+    .pipe(gulp.dest('/dest/mall/'));
+});
+```
+
+
 比如：
 ```php
 <link rel="shortcut icon" type="image/x-icon" href="<?= $this->StaticUrl('/static/favicon.ico') ?>"/>
