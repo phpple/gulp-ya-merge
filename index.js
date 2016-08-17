@@ -3,7 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const matchFlags = {
-  'fileExp': /<\?\=\$this\->StaticUrl\(\'([^\']+)\'\)\?>/gm,
+  'fileExp': /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm,
   'leftFlag': '<!--min[',
   'rightFlag': ']-->',
   'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
