@@ -37,7 +37,7 @@ function mergeFiles(files, mergedName, rootPath) {
   files.forEach(function (file) {
     var filepath = rootPath + file;
     if (fs.existsSync(filepath)) {
-      content += '// ' + file + "\n" + fs.readFileSync(filepath, "utf-8") + "\n";
+      content += '/* ' + file + "*/\n" + fs.readFileSync(filepath, "utf-8") + "\n";
     } else {
       console.log(filepath + " not exist");
     }
