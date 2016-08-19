@@ -16,6 +16,27 @@ gulp.task('merge', function () {
 });
 ```
 
+## 定制
+目前没有提供选项修改配置项，如果需要修改，请找到index.js文件，修改下面的代码即可：
+```js
+const matchFlags = {
+  // 用来匹配合并区间内的文件地址
+  'fileExp': /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm,
+  // 合并区间代码的起始标识
+  'leftFlag': '<!--min[',
+  // 合并区间代码的结束标识
+  'rightFlag': ']-->',
+  // 合并后要替换的地址。{$base}代表目录及文件名（不包括后缀），{$stamp}代表文件版本号，{$ext}代表文件的后缀
+  'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
+  // 文件版本号的长度
+  'hashLength': 8,
+  // 要替换的非合并的js的正则表达式
+  'jsExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
+  // 要替换的非合并的css的正则表达式
+  'cssExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm
+};
+```
+
 
 比如：
 ```php
