@@ -8,19 +8,20 @@ const matchFlags = {
   'rightFlag': ']-->',
   'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
   'hashLength': 8,
-  'jsExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
-  'cssExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm
+  'scriptExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
+  'linkExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm
 };
 const fs = require('fs');
 
 /**
  * 获取要合并的文件列表
- * @param content
+ * @param {string} content
+ * @param {RegExp} exp
  * @return [string]
  */
-function getMergingFiles(content) {
+function getMergingFiles(content, exp) {
   var ret = [], line;
-  while (line = matchFlags.fileExp.exec(content)) {
+  while (line = exp.exec(content)) {
     ret.push(line[1]);
   }
   return ret;
@@ -48,6 +49,11 @@ function mergeFiles(files, mergedName, rootPath) {
 
 module.exports = function (options) {
   options = options || {};
+  for (var k in matchFlags) {
+    if (!(k in options)) {
+      options[k] = matchFlags[k];
+    }
+  }
   var rootPath = options.rootPath || '';
 
   /**
@@ -66,7 +72,7 @@ module.exports = function (options) {
       var md5 = md5sum.digest('hex');
 
       var info = path.parse(url);
-      url = info.dir + '/' + info.name + '-' + md5.substr(0, matchFlags.hashLength) + info.ext;
+      url = info.dir + '/' + info.name + '-' + md5.substr(0, options.hashLength) + info.ext;
       return seg1 + url + seg2;
     }
     return all;
@@ -84,12 +90,12 @@ module.exports = function (options) {
     var replaces = [];
 
     while (true) {
-      var pos1 = content.indexOf(matchFlags.leftFlag, start);
+      var pos1 = content.indexOf(options.leftFlag, start);
       if (pos1 == -1) {
         break;
       }
       pos1 += 8;
-      var pos2 = content.indexOf(matchFlags.rightFlag, pos1);
+      var pos2 = content.indexOf(options.rightFlag, pos1);
       if (pos2 == -1) {
         break;
       }
@@ -102,7 +108,7 @@ module.exports = function (options) {
       var mergedId = arr[0];
       mergedName = arr[1];
       // 寻找闭合标签
-      var closedMatcher = matchFlags.leftFlag + mergedId + matchFlags.rightFlag;
+      var closedMatcher = options.leftFlag + mergedId + options.rightFlag;
       var pos3 = content.indexOf(closedMatcher, pos2 + 4);
       if (pos3 === -1) {
         start = pos2;
@@ -111,7 +117,7 @@ module.exports = function (options) {
 
       // 找到闭合标签后，对中间的内容进行处理
       pos2 += 4;
-      var files = getMergingFiles(content.substr(pos2, pos3 - pos2));
+      var files = getMergingFiles(content.substr(pos2, pos3 - pos2), options.fileExp);
       var mergedContent = mergeFiles(files, mergedName, rootPath);
       // 修改html代码
       // console.log("write finish: " + rootPath + mergedName);
@@ -136,10 +142,10 @@ module.exports = function (options) {
     for (var i = replaces.length - 1; i >= 0; i--) {
       var rep = replaces[i], repStr, newPath;
       var info = path.parse(rep.path);
-      newPath = matchFlags.newPath
+      newPath = options.newPath
         .replace('{$base}', info.dir + '/' + info.name)
         .replace('{$ext}', info.ext)
-        .replace('{$stamp}', rep.stamp.substr(0, matchFlags.hashLength));
+        .replace('{$stamp}', rep.stamp.substr(0, options.hashLength));
 
       if (rep.type == 'js') {
         repStr = '<script src="' + newPath + '"></script>';
@@ -151,8 +157,8 @@ module.exports = function (options) {
 
     // 对剩余的js或样式进行替换
     var newContent = content
-      .replace(matchFlags.jsExp, replaceUrl)
-      .replace(matchFlags.cssExp, replaceUrl);
+      .replace(options.scriptExp, replaceUrl)
+      .replace(options.linkExp, replaceUrl);
     if (replaces.length || newContent != content) {
       file.contents = new Buffer(newContent);
     }

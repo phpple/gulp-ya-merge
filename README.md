@@ -1,44 +1,65 @@
 # gulp-ya-merge
 
-用来合并html页面里边的js和css，并对js和css增加文件版本号。
+`gulp-ya-merge`并不用来压缩静态文件,而是用于在静态文件被压缩后,对html页面引用的的静态文件进行合并和追加文件版本等操作。
 
 ## 用法
 ```js
 var destDir = "dist";
 var merge = require('gulp-ya-merge');
+var options = {
+  rootPath: process.cwd() + '/share/static/'
+};
 
 gulp.task('merge', function () {
   gulp.src('mall/**/*.phtml')
-    .pipe(merge({
-      rootPath: process.cwd() + '/share/static/',
-    }))
+    .pipe(merge(options))
     .pipe(gulp.dest('/dest/mall/'));
 });
 ```
 
-## 定制
-目前没有提供选项修改配置项，如果需要修改，请找到index.js文件，修改下面的代码即可：
-```js
-const matchFlags = {
-  // 用来匹配合并区间内的文件地址
-  'fileExp': /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm,
-  // 合并区间代码的起始标识
-  'leftFlag': '<!--min[',
-  // 合并区间代码的结束标识
-  'rightFlag': ']-->',
-  // 合并后要替换的地址。{$base}代表目录及文件名（不包括后缀），{$stamp}代表文件版本号，{$ext}代表文件的后缀
-  'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
-  // 文件版本号的长度
-  'hashLength': 8,
-  // 要替换的非合并的js的正则表达式
-  'jsExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
-  // 要替换的非合并的css的正则表达式
-  'cssExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm
-};
+## 选项
+`gulp-ya-merge`可传入一个对象作为参数,选项的可选值如下：
+
+|  参数         | 说明                                                                                     |       默认值  |
+|--------------|-----------------------------------------------------------------------------------------|--------------|
+| `rootPath`   | 静态文件的根目录                                                                           | 当前目录       |
+| `fileExp`    | 用来匹配合并区间内的文件地址的正则                                                             | /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm |
+| `leftFlag`   | 合并区间代码的起始标识                                                                      | <!--min[      |
+| `rightFlag`  | 合并区间代码的结束标识                                                                      | ]-->          |
+| `newPath`    | 合并后要替换的地址。{$base}代表目录及文件名（不包括后缀），{$stamp}代表文件版本号，{$ext}代表文件的后缀 | <?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?> |
+| `hashLength` | 文件版本号的长度                                                                           | 8              |
+| `scriptExp`  | 要替换的非合并的script标签的正则表达式                                                        | /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm |
+| `linkExp`    | 要替换的非合并的link标签的正则表达式                                                          | /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm |
+
+
+## 语法规则
+
+下面用${xxx}表示上面的配置项,归结html代码的规则如下:
+```html
+{$leftFlag}{$flag1} {$destPath1}.js{$rightFlag}
+<script src="{$fileExp}"></script>
+<script src="{$fileExp}"></script>
+{$leftFlag}{$flag1}{$rightFlag}
+
+{$leftFlag}{flag2} {$destPath2}.css{$rightFlag}
+<link rel="stylesheet" type="text/css" href="{$fileExp}"/>
+<link rel="stylesheet" type="text/css" href="{$fileExp}"/>
+<script src="{$fileExp}"></script>
+{$leftFlag}{$flag2}{$rightFlag}
+
+<script src="{$jsExp}"></script>
+<link rel="stylesheet" type="text/css" href="{$cssExp}"/>
 ```
 
+最后将变成如下的代码:
+```html
+<script src="{$destPath1}-{$stamp1}.js"></script>
+<link rel="stylesheet" type="text/css" href="{$destPath2}-{$stamp2}.css"/>
+<script src="{$destPath3}-{$stamp3}.js"></script>
+<link rel="stylesheet" type="text/css" href="{$destPath4}-{$stamp4}.css"/>
+```
 
-比如：
+## 示例
 ```php
 <link rel="shortcut icon" type="image/x-icon" href="<?= $this->StaticUrl('/static/favicon.ico') ?>"/>
 <?php if (isset($this->v['mobileUrl'])): ?>

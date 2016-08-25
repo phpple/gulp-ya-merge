@@ -1,7 +1,8 @@
 {
   "name": "gulp-ya-merge",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "gulp-ya-merge用于在静态文件被压缩等处理后,对html页面引用的的静态文件进行合并、追加文件版本等操作。",
+  "keywords": ["合并", "concat", "stamp", "版本"],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
