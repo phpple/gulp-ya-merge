@@ -23,7 +23,6 @@ gulp.task('merge', function () {
 |  参数         | 说明                                                                                     |       默认值  |
 |--------------|-----------------------------------------------------------------------------------------|--------------|
 | `rootPath`   | 静态文件的根目录                                                                           | 当前目录       |
-| `fileExp`    | 用来匹配合并区间内的文件地址的正则                                                             | /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm |
 | `leftFlag`   | 合并区间代码的起始标识                                                                      | <!--min[      |
 | `rightFlag`  | 合并区间代码的结束标识                                                                      | ]-->          |
 | `newPath`    | 合并后要替换的地址。{$base}代表目录及文件名（不包括后缀），{$stamp}代表文件版本号，{$ext}代表文件的后缀 | <?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?> |
@@ -32,32 +31,34 @@ gulp.task('merge', function () {
 | `linkExp`    | 要替换的非合并的link标签的正则表达式                                                          | /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)(?:\/?>|<\/link>))/gm |
 
 
+需要注意的是：
+`scriptExp`和`linkExp`需要包括3对小括号，第1对小括号表示静态文件前面的匹配内容，第2对小括号表示静态文件的网址，第3对小括号表示静态文件后面的匹配内容。
+
 ## 语法规则
 
 下面用${xxx}表示上面的配置项,归结html代码的规则如下:
 ```html
 {$leftFlag}{$flag1} {$destPath1}.js{$rightFlag}
-<script src="{$fileExp}"></script>
-<script src="{$fileExp}"></script>
+{scriptExp}
 {$leftFlag}{$flag1}{$rightFlag}
 
-{$leftFlag}{flag2} {$destPath2}.css{$rightFlag}
-<link rel="stylesheet" type="text/css" href="{$fileExp}"/>
-<link rel="stylesheet" type="text/css" href="{$fileExp}"/>
-<script src="{$fileExp}"></script>
+{$leftFlag}{$flag2} {$destPath2}.css{$rightFlag}
+{linkExp}
 {$leftFlag}{$flag2}{$rightFlag}
 
-<script src="{$jsExp}"></script>
-<link rel="stylesheet" type="text/css" href="{$cssExp}"/>
+{$scriptExp}
+{$linkExp}
 ```
 
 最后将变成如下的代码:
 ```html
 <script src="{$destPath1}-{$stamp1}.js"></script>
 <link rel="stylesheet" type="text/css" href="{$destPath2}-{$stamp2}.css"/>
-<script src="{$destPath3}-{$stamp3}.js"></script>
-<link rel="stylesheet" type="text/css" href="{$destPath4}-{$stamp4}.css"/>
+<script src="{$newPath1}"></script>
+<link rel="stylesheet" type="text/css" href="{$newPath1}"/>
 ```
+
+
 
 ## 示例
 ```php

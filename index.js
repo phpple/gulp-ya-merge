@@ -3,7 +3,6 @@ const path = require('path');
 const crypto = require('crypto');
 
 const matchFlags = {
-  'fileExp': /<\?\=\s*\$this\->StaticUrl\(\s*\'([^\']+)\'\s*\)\s*\?>/gm,
   'leftFlag': '<!--min[',
   'rightFlag': ']-->',
   'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
@@ -22,7 +21,7 @@ const fs = require('fs');
 function getMergingFiles(content, exp) {
   var ret = [], line;
   while (line = exp.exec(content)) {
-    ret.push(line[1]);
+    ret.push(line[2]);
   }
   return ret;
 }
@@ -117,7 +116,14 @@ module.exports = function (options) {
 
       // 找到闭合标签后，对中间的内容进行处理
       pos2 += 4;
-      var files = getMergingFiles(content.substr(pos2, pos3 - pos2), options.fileExp);
+      // 根据要合成的文件的后缀，决定是用scriptExp还是linkExp
+      var mergedExt = path.extname(mergedName).toLowerCase(), fileExp;
+      if (mergedExt == '.js') {
+        fileExp = options.scriptExp;
+      } else {
+        fileExp = options.scriptExp;
+      }
+      var files = getMergingFiles(content.substr(pos2, pos3 - pos2), fileExp);
       var mergedContent = mergeFiles(files, mergedName, rootPath);
       // 修改html代码
       // console.log("write finish: " + rootPath + mergedName);
