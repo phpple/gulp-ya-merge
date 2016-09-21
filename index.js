@@ -121,7 +121,7 @@ module.exports = function (options) {
       if (mergedExt == '.js') {
         fileExp = options.scriptExp;
       } else {
-        fileExp = options.scriptExp;
+        fileExp = options.linkExp;
       }
       var files = getMergingFiles(content.substr(pos2, pos3 - pos2), fileExp);
       var mergedContent = mergeFiles(files, mergedName, rootPath);
