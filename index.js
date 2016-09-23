@@ -7,8 +7,8 @@ const matchFlags = {
   'rightFlag': ']-->',
   'newPath': '<?=$this->StaticUrl(\'{$base}-{$stamp}{$ext}\')?>',
   'hashLength': 8,
-  'scriptExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
-  'linkExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"\-]+)([\'\"]\)(?:[^\/\>]*)(?:\/?>|<\/link>))/gm
+  'scriptExp': /(<script\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"]+)([\'\"]\)(?:[^\/]*)><\/script>)/gm,
+  'linkExp': /(<link\s(?:.*)\$this->StaticUrl\([\'\"])([^\'\"]+)([\'\"]\)(?:[^\/\>]*)(?:\/?>|<\/link>))/gm
 };
 const fs = require('fs');
 
